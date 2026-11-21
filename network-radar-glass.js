@@ -2491,6 +2491,8 @@ function servicePolicyCandidates(serviceId, category) {
     ],
 
     spotify: [
+      // Glass fork: 用户配置里的分组名是小写 spotify（上游写 Spotify，大小写对不上匹配不到），放最前面优先匹配
+      "spotify",
       "Spotify",
       "SPOTIFY",
       "声破天",
@@ -2510,6 +2512,8 @@ function servicePolicyCandidates(serviceId, category) {
     ],
 
     tiktok: [
+      // Glass fork: 用户配置里的分组名是 Tiktok（上游写 TikTok），放最前面优先匹配
+      "Tiktok",
       "TikTok",
       "Tik Tok",
       "TIKTOK",
@@ -2577,6 +2581,8 @@ function servicePolicyCandidates(serviceId, category) {
     ],
 
     chatgpt: [
+      // Glass fork: 用户配置里的分组名是 Chatgpt（上游写 ChatGPT），放最前面优先匹配
+      "Chatgpt",
       "ChatGPT",
       "Chat GPT",
       "OpenAI",
