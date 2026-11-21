@@ -1620,20 +1620,9 @@ export default async function (ctx) {
 
             col(
               [
-                row(
-                  [
-                    text(networkName, 11, "semibold", C.text, {
-                      flex: 1,
-                      maxLines: 1,
-                      minScale: 0.68
-                    }),
-
-                    pill("已连接", C.green, C.greenSoft, {
-                      padding: [1, 4]
-                    })
-                  ],
-                  { gap: 3 }
-                ),
+                pill("已连接", C.green, C.greenSoft, {
+                  padding: [1, 4]
+                }),
 
                 text(displayIP(localIP), 8, "medium", C.subtext, {
                   maxLines: 1,
