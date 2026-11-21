@@ -1486,7 +1486,7 @@ export default async function (ctx) {
       [
         row(
           [
-            iconBox("waveform.path.ecg", C.blue, C.blueSoft, 34),
+            iconBox("waveform.path.ecg", C.blue, C.blueSoft, 36),
 
             col(
               [
@@ -1616,7 +1616,7 @@ export default async function (ctx) {
 
         row(
           [
-            iconBox("wifi", C.blue, C.blueSoft, 54),
+            iconBox("wifi", C.blue, C.blueSoft, 60),
 
             col(
               [
@@ -1708,7 +1708,7 @@ export default async function (ctx) {
       ],
       {
         flex: 1,
-        height: 116
+        height: 124
       }
     );
   }
@@ -1722,8 +1722,8 @@ export default async function (ctx) {
         })
       ],
       {
-        width: 42,
-        height: 42,
+        width: 46,
+        height: 46,
         padding: 2,
         backgroundColor: C.purpleSoft,
         borderRadius: 11
@@ -1744,8 +1744,8 @@ export default async function (ctx) {
           muted: uiColor(C.muted)
         }
       ),
-      72,
-      55,
+      80,
+      61,
       {
         borderRadius: 16
       }
@@ -1898,7 +1898,7 @@ export default async function (ctx) {
       ],
       {
         flex: 1,
-        height: 116,
+        height: 124,
         padding: [5, 6],
         gap: 3
       }
@@ -1907,8 +1907,8 @@ export default async function (ctx) {
 
   function serviceLogoLarge(item) {
     const base = {
-      width: 26,
-      height: 26,
+      width: 30,
+      height: 30,
       padding: 2,
       backgroundColor: C.tileIconBg,
       borderRadius: 7
@@ -2055,7 +2055,7 @@ export default async function (ctx) {
 
         col(
           [
-            text(item.name, 9, "semibold", C.text, {
+            text(item.name, 10, "semibold", C.text, {
               maxLines: 1,
               minScale: 0.66
             }),
@@ -2074,7 +2074,7 @@ export default async function (ctx) {
 
                 text(
                   item.ok ? "OK" : "失败",
-                  6.5,
+                  7,
                   "semibold",
                   statusColor,
                   {
@@ -2093,8 +2093,8 @@ export default async function (ctx) {
       ],
       {
         flex: 1,
-        height: 39,
-        padding: [6, 6],
+        height: 44,
+        padding: [7, 7],
         gap: 4,
         backgroundColor: C.tileBg,
         borderRadius: 9,
@@ -2113,7 +2113,7 @@ export default async function (ctx) {
             compactServiceTile(items[1])
           ],
           {
-            height: 39,
+            height: 44,
             gap: 5
           }
         ),
@@ -2124,7 +2124,7 @@ export default async function (ctx) {
             compactServiceTile(items[3])
           ],
           {
-            height: 39,
+            height: 44,
             gap: 5
           }
         ),
@@ -2135,14 +2135,14 @@ export default async function (ctx) {
             compactServiceTile(items[5])
           ],
           {
-            height: 39,
+            height: 44,
             gap: 5
           }
         )
       ],
       {
         flex: 1,
-        height: 125,
+        height: 142,
         gap: 4
       }
     );
@@ -2168,7 +2168,7 @@ export default async function (ctx) {
       ],
       {
         flex: 1,
-        height: 160,
+        height: 178,
         padding: [6, 7],
         gap: 5
       }
@@ -2180,7 +2180,7 @@ export default async function (ctx) {
       [
         row(
           [
-            image(symbol, tone, 16, 16),
+            image(symbol, tone, 18, 18),
 
             col(
               [
@@ -2263,7 +2263,7 @@ export default async function (ctx) {
       ],
       {
         height: 40,
-        padding: [5, 5],
+        padding: [6, 6],
         gap: 0
       }
     );
@@ -2279,7 +2279,7 @@ export default async function (ctx) {
           proxyCard()
         ],
         {
-          height: 116,
+          height: 124,
           gap: 6,
           alignItems: "start"
         }
@@ -2291,7 +2291,7 @@ export default async function (ctx) {
           serviceCard("AI 解锁检测", "sparkles", ai, C.purple)
         ],
         {
-          height: 160,
+          height: 178,
           gap: 6,
           alignItems: "start"
         }
