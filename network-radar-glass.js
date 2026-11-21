@@ -1333,7 +1333,7 @@ export default async function (ctx) {
         alignItems: "start",
         padding: [7, 8],
         gap: 4,
-        backgroundColor: C.card,
+        backgroundColor: glass ? "#00000000" : C.card,
         ...(glass ? {} : {
           backgroundGradient: {
             type: "linear",
@@ -1343,7 +1343,7 @@ export default async function (ctx) {
           }
         }),
         borderRadius: 14,
-        borderWidth: 1,
+        borderWidth: glass ? 0 : 1,
         borderColor: C.cardBorder,
         children: children || []
       },
@@ -2096,9 +2096,9 @@ export default async function (ctx) {
         height: 42,
         padding: [6, 6],
         gap: 4,
-        backgroundColor: C.tileBg,
+        backgroundColor: glass ? "#00000000" : C.tileBg,
         borderRadius: 9,
-        borderWidth: 1,
+        borderWidth: glass ? 0 : 1,
         borderColor: C.tileBorder
       }
     );
