@@ -11,8 +11,8 @@ export default async function(ctx) {
   const glass = String(ctx.env?.WIDGET_STYLE || 'glass').trim().toLowerCase() !== 'classic';
   const C = {
     bg: { light: '#FFFFFF', dark: '#121212' },
-    cardBg: glass ? { light: 'rgba(255,255,255,0.55)', dark: 'rgba(255,255,255,0.08)' } : { light: '#F2F2F7', dark: '#1C1C1E' },     
-    bubbleBg: { light: '#8E8E9315', dark: '#FFFFFF15' }, 
+    cardBg: glass ? '#00000000' : { light: '#F2F2F7', dark: '#1C1C1E' },
+    bubbleBg: glass ? '#00000000' : { light: '#8E8E9315', dark: '#FFFFFF15' },
     main: { light: '#1C1C1E', dark: '#FFFFFF' },
     sub: { light: '#48484A', dark: '#D1D1D6' },
     muted: { light: '#8E8E93', dark: '#8E8E93' },

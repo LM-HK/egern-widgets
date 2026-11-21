@@ -1222,7 +1222,7 @@ function smallRow(
       8,
     ],
 
-    backgroundColor: {
+    backgroundColor: GLASS ? '#00000000' : {
       light: color + '40',
       dark: color + '33',
     },
