@@ -33,3 +33,7 @@ https://raw.githubusercontent.com/LM-HK/egern-widgets/main/shishiyoujia-glass.ya
 ## 虚拟货币价格
 
 https://raw.githubusercontent.com/LM-HK/egern-widgets/main/crypto-glass.yaml
+
+## 网络诊断雷达
+
+https://raw.githubusercontent.com/LM-HK/egern-widgets/main/network-radar-glass.yaml

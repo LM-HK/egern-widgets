@@ -1,0 +1,44 @@
+name: "📡 网络诊断雷达 · 透明版"
+description: "网络诊断雷达：本地网络、当前代理、流媒体/AI 解锁检测与 IP 纯净评分；glass 默认透明"
+author: "lylywayr · glass fork"
+homepage: "https://github.com/lylywayr/NetWork-Module"
+icon: "waveform.path.ecg"
+
+env_schema:
+  POLICY:
+    name: 统一策略
+    description: "指定后出口、延迟、UDP/QUIC、流媒体、AI 全部统一走该策略，留空用默认规则"
+    default_value: ""
+  LMT:
+    name: 流媒体策略
+    description: "流媒体检测走的策略组，POLICY 为空时生效，留空自动匹配"
+    default_value: ""
+  AI:
+    name: AI 策略
+    description: "AI 检测走的策略组，POLICY 为空时生效，留空自动匹配"
+    default_value: ""
+  YS:
+    name: 隐私打码
+    description: "填 1 打码 IP，如 123.123.*.*；填 0 或留空不打码"
+    default_value: "0"
+  XY:
+    name: 手动指定协议
+    description: "如 VLESS / Trojan / HY2 / AnyTLS，留空自动识别"
+    default_value: ""
+  WIDGET_STYLE:
+    name: 样式
+    description: "glass 透明 / classic 原版"
+    default_value: "glass"
+    options:
+      - "glass"
+      - "classic"
+
+scriptings:
+- generic:
+    name: network-radar-glass
+    script_url: https://raw.githubusercontent.com/LM-HK/egern-widgets/main/network-radar-glass.js
+    timeout: 60
+
+widgets:
+- name: 网络诊断雷达
+  script_name: network-radar-glass
