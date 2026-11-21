@@ -1,0 +1,50 @@
+name: "IP 纯净度 · 透明版"
+
+description: "用 IPPure 检测出口 IP 的风险分、原生/广播、住宅/机房、地区和 ASN；glass 默认透明"
+
+author: "vfelix7 · glass fork"
+
+icon: "shield.lefthalf.filled"
+
+env_schema:
+
+  POLICY:
+    name: "检测策略"
+    description: "检测哪个策略组或节点的出口 IP（如 Proxy、香港）；留空按 Egern 分流规则"
+
+  MARK_IP:
+    name: "IP 打码"
+    description: "隐藏 IP 中间段，默认开启"
+    default_value: "true"
+    options:
+      - "true"
+      - "false"
+
+  REFRESH_MINUTES:
+    name: "刷新间隔（分钟）"
+    default_value: "10"
+
+  LABEL:
+    name: "名称"
+    description: "用来区分多个小组件（小号、中号显示在右下角；大号不显示，「检测」一行已写明策略）；不填时显示检测策略名"
+
+  WIDGET_STYLE:
+    name: "样式"
+    description: "glass 透明 / classic 原版"
+    default_value: "glass"
+    options:
+      - "glass"
+      - "classic"
+
+scriptings:
+
+  - generic:
+      name: "ip-purity-widget-glass"
+      script_url: "https://raw.githubusercontent.com/LM-HK/egern-widgets/main/ip-purity-glass.js"
+      update_interval: 300
+      timeout: 15
+
+widgets:
+
+  - name: "IP 纯净度"
+    script_name: "ip-purity-widget-glass"

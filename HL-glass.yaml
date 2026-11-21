@@ -1,0 +1,23 @@
+name: "📅 日历 / 老黄历 · 透明版"
+description: "日历 / 老黄历小组件：公历、农历、干支、宜忌、冲煞、节气与节日倒计时；glass 默认透明"
+author: "xcgtb · glass fork"
+homepage: "https://github.com/xcgtb/Egern-Widgets"
+icon: "calendar.circle.fill"
+
+env_schema:
+  WIDGET_STYLE:
+    name: 样式
+    description: "glass 透明 / classic 原版"
+    default_value: "glass"
+    options:
+      - "glass"
+      - "classic"
+
+scriptings:
+- generic:
+    name: HL-glass
+    script_url: https://raw.githubusercontent.com/LM-HK/egern-widgets/main/HL-glass.js
+
+widgets:
+- name: 日历 / 老黄历
+  script_name: HL-glass

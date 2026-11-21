@@ -1,0 +1,31 @@
+name: "📌 全国油价 · 透明版（无锡）"
+description: "全国油价小组件：92#/95#/98#/柴油实时价与调价倒计时；默认江苏·无锡，中石化官方价；glass 默认透明"
+author: "mickeu · Egern adaptation: ErrBin · glass fork"
+homepage: "https://github.com/Aswoth/Egern--Widget"
+icon: "fuelpump.fill"
+
+env_schema:
+  PROVINCE:
+    name: 省份
+    description: "省份名或代码，如 江苏 / 32，默认江苏"
+    default_value: "江苏"
+  CITY:
+    name: 城市
+    description: "城市名，如 无锡，默认无锡"
+    default_value: "无锡"
+  WIDGET_STYLE:
+    name: 样式
+    description: "glass 透明 / classic 原版"
+    default_value: "glass"
+    options:
+      - "glass"
+      - "classic"
+
+scriptings:
+- generic:
+    name: shishiyoujia-glass
+    script_url: https://raw.githubusercontent.com/LM-HK/egern-widgets/main/shishiyoujia-glass.js
+
+widgets:
+- name: 全国油价
+  script_name: shishiyoujia-glass

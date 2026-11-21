@@ -1,0 +1,28 @@
+name: "₿ 虚拟货币价格 · 透明版"
+description: "Binance 行情，无需 Key，默认 BTC、ETH、BNB 三个币种（最多 8 个），支持小/中/大尺寸与锁屏；glass 默认透明"
+author: "iBL3ND · glass fork"
+homepage: "https://github.com/IBL3ND/module"
+icon: "https://iili.io/KDiAbJS.png"
+
+env_schema:
+  btcType:
+    name: 币种
+    description: "币种符号，多个用英文逗号分隔，如 BTC,ETH,BNB，最多 8 个，空格自动忽略"
+    default_value: "BTC,ETH,BNB"
+  WIDGET_STYLE:
+    name: 样式
+    description: "glass 透明 / classic 原版"
+    default_value: "glass"
+    options:
+      - "glass"
+      - "classic"
+
+scriptings:
+- generic:
+    name: crypto-glass
+    script_url: https://raw.githubusercontent.com/LM-HK/egern-widgets/main/crypto-glass.js
+    timeout: 30
+
+widgets:
+- name: 虚拟货币价格
+  script_name: crypto-glass

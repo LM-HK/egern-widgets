@@ -1,0 +1,39 @@
+name: "🌸 花云到期倒计时"
+description: "花云套餐到期倒计时：剩余天数、到期日、续费；订阅是阅后即焚链接，实时用量读不到，只显示倒计时；续费后在模块设置里改到期日即可"
+author: "小明"
+homepage: "https://github.com/LM-HK/egern-widgets"
+icon: "hourglass"
+
+env_schema:
+  PLAN:
+    name: 套餐
+    description: "套餐名，如 花云 Lite 150G"
+    default_value: "花云 Lite 150G"
+  START_DATE:
+    name: 服务开始日
+    description: "格式 YYYY-MM-DD，如 2026-11-14，用于进度条"
+    default_value: "2026-11-14"
+  EXPIRE_DATE:
+    name: 到期日
+    description: "格式 YYYY-MM-DD，如 2026-12-13；续费后改成新的到期日"
+    default_value: "2026-12-13"
+  FEE:
+    name: 续费
+    description: "如 ¥39/月"
+    default_value: "¥39/月"
+  WIDGET_STYLE:
+    name: 样式
+    description: "glass 透明 / classic 原版"
+    default_value: "glass"
+    options:
+      - "glass"
+      - "classic"
+
+scriptings:
+- generic:
+    name: flowercloud-countdown
+    script_url: https://raw.githubusercontent.com/LM-HK/egern-widgets/main/flowercloud-countdown.js
+
+widgets:
+- name: 花云到期倒计时
+  script_name: flowercloud-countdown

@@ -1,0 +1,23 @@
+name: "💱 多国汇率 · 透明版"
+description: "多国汇率小组件：美元、欧元、英镑、日元、港币、韩元兑人民币；glass 默认透明"
+author: "jadkg · glass fork"
+homepage: "https://github.com/jadkg/egern"
+icon: "banknote.fill"
+
+env_schema:
+  WIDGET_STYLE:
+    name: 样式
+    description: "glass 透明 / classic 原版"
+    default_value: "glass"
+    options:
+      - "glass"
+      - "classic"
+
+scriptings:
+- generic:
+    name: exchange-rate-glass
+    script_url: https://raw.githubusercontent.com/LM-HK/egern-widgets/main/exchange-rate-glass.js
+
+widgets:
+- name: 多国汇率
+  script_name: exchange-rate-glass
