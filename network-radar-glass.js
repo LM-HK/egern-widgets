@@ -1486,7 +1486,7 @@ export default async function (ctx) {
       [
         row(
           [
-            iconBox("waveform.path.ecg", C.blue, C.blueSoft, 36),
+            iconBox("waveform.path.ecg", C.blue, C.blueSoft, 35),
 
             col(
               [
@@ -1616,7 +1616,7 @@ export default async function (ctx) {
 
         row(
           [
-            iconBox("wifi", C.blue, C.blueSoft, 60),
+            iconBox("wifi", C.blue, C.blueSoft, 58),
 
             col(
               [
@@ -1708,7 +1708,7 @@ export default async function (ctx) {
       ],
       {
         flex: 1,
-        height: 124
+        height: 122
       }
     );
   }
@@ -1744,8 +1744,8 @@ export default async function (ctx) {
           muted: uiColor(C.muted)
         }
       ),
-      80,
-      61,
+      78,
+      60,
       {
         borderRadius: 16
       }
@@ -1898,7 +1898,7 @@ export default async function (ctx) {
       ],
       {
         flex: 1,
-        height: 124,
+        height: 122,
         padding: [5, 6],
         gap: 3
       }
@@ -1907,8 +1907,8 @@ export default async function (ctx) {
 
   function serviceLogoLarge(item) {
     const base = {
-      width: 30,
-      height: 30,
+      width: 28,
+      height: 28,
       padding: 2,
       backgroundColor: C.tileIconBg,
       borderRadius: 7
@@ -2055,7 +2055,7 @@ export default async function (ctx) {
 
         col(
           [
-            text(item.name, 10, "semibold", C.text, {
+            text(item.name, 9, "semibold", C.text, {
               maxLines: 1,
               minScale: 0.66
             }),
@@ -2093,8 +2093,8 @@ export default async function (ctx) {
       ],
       {
         flex: 1,
-        height: 44,
-        padding: [7, 7],
+        height: 42,
+        padding: [6, 6],
         gap: 4,
         backgroundColor: C.tileBg,
         borderRadius: 9,
@@ -2113,7 +2113,7 @@ export default async function (ctx) {
             compactServiceTile(items[1])
           ],
           {
-            height: 44,
+            height: 42,
             gap: 5
           }
         ),
@@ -2124,7 +2124,7 @@ export default async function (ctx) {
             compactServiceTile(items[3])
           ],
           {
-            height: 44,
+            height: 42,
             gap: 5
           }
         ),
@@ -2135,14 +2135,14 @@ export default async function (ctx) {
             compactServiceTile(items[5])
           ],
           {
-            height: 44,
+            height: 42,
             gap: 5
           }
         )
       ],
       {
         flex: 1,
-        height: 142,
+        height: 134,
         gap: 4
       }
     );
@@ -2168,7 +2168,7 @@ export default async function (ctx) {
       ],
       {
         flex: 1,
-        height: 178,
+        height: 166,
         padding: [6, 7],
         gap: 5
       }
@@ -2254,7 +2254,7 @@ export default async function (ctx) {
             )
           ],
           {
-            height: 34,
+            height: 28,
             padding: [0, 0],
             gap: 0,
             alignItems: "center"
@@ -2262,8 +2262,8 @@ export default async function (ctx) {
         )
       ],
       {
-        height: 40,
-        padding: [6, 6],
+        height: 38,
+        padding: [5, 5],
         gap: 0
       }
     );
@@ -2279,7 +2279,7 @@ export default async function (ctx) {
           proxyCard()
         ],
         {
-          height: 124,
+          height: 122,
           gap: 6,
           alignItems: "start"
         }
@@ -2291,7 +2291,7 @@ export default async function (ctx) {
           serviceCard("AI 解锁检测", "sparkles", ai, C.purple)
         ],
         {
-          height: 178,
+          height: 166,
           gap: 6,
           alignItems: "start"
         }
