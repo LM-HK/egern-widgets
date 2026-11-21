@@ -33,7 +33,9 @@ export default async function (ctx) {
   const SCHEME = detectScheme(ctx);
 
   const POLICY = clean(env.POLICY);
-  const POLICY_LABEL = POLICY || "默认规则";
+  // Glass fork: 当前代理（出口、延迟、UDP/QUIC）固定走 MAIN_POLICY，默认花云；不影响流媒体与 AI 各自的分组
+  const MAIN_POLICY = clean(env.MAIN_POLICY) || "花云";
+  const POLICY_LABEL = MAIN_POLICY || POLICY || "默认规则";
   const LMT_POLICY = clean(env.LMT);
   const AI_POLICY = clean(env.AI);
   const MASK_IP = clean(env.YS) === "1";
@@ -342,6 +344,99 @@ export default async function (ctx) {
     }
   }
 
+  // Glass fork: 按指定策略发请求（给当前代理的出口/延迟/QUIC 用）
+  async function getJSONPolicy(url, policy) {
+    try {
+      const response = await ctx.http.get(url, serviceRequestOptions(policy));
+      return {
+        ok: response.status >= 200 && response.status < 400,
+        status: response.status,
+        data: await response.json()
+      };
+    } catch (_) {
+      return {
+        ok: false,
+        status: 0,
+        data: null
+      };
+    }
+  }
+
+  async function getTextPolicy(url, policy) {
+    const startedAt = Date.now();
+
+    try {
+      const response = await ctx.http.get(url, serviceRequestOptions(policy));
+      return {
+        ok: response.status >= 200 && response.status < 400,
+        status: response.status,
+        text: (await response.text()) || "",
+        ms: Math.max(1, Date.now() - startedAt)
+      };
+    } catch (_) {
+      return {
+        ok: false,
+        status: 0,
+        text: "",
+        ms: Math.max(1, Date.now() - startedAt)
+      };
+    }
+  }
+
+  async function latencyProbePolicy(url, policy) {
+    const startedAt = Date.now();
+
+    try {
+      const response = await ctx.http.get(url, serviceRequestOptions(policy));
+
+      return {
+        ok: response.status >= 200 && response.status < 400,
+        status: response.status,
+        ms: Math.max(1, Date.now() - startedAt),
+        url: url
+      };
+    } catch (_) {
+      return {
+        ok: false,
+        status: 0,
+        ms: Math.max(1, Date.now() - startedAt),
+        url: url
+      };
+    }
+  }
+
+  async function measureLatencySetPolicy(urls, policy) {
+    const results = await Promise.all(
+      urls.map(function (url) {
+        return latencyProbePolicy(url, policy);
+      })
+    );
+
+    const passed = results
+      .filter(function (item) {
+        return item.ok && item.ms > 0;
+      })
+      .sort(function (a, b) {
+        return a.ms - b.ms;
+      });
+
+    if (passed.length === 0) {
+      return {
+        ok: false,
+        ms: 0,
+        target: ""
+      };
+    }
+
+    const best = passed[0];
+
+    return {
+      ok: true,
+      ms: best.ms,
+      target: best.url
+    };
+  }
+
   async function getServiceStatus(url, servicePolicy) {
     const startedAt = Date.now();
 
@@ -583,13 +678,14 @@ export default async function (ctx) {
 
   async function getExit() {
     const baseResults = await Promise.all([
-      getJSON("https://api.ipapi.is/?_=" + Date.now()),
-      getJSON(
+      getJSONPolicy("https://api.ipapi.is/?_=" + Date.now(), MAIN_POLICY),
+      getJSONPolicy(
         "http://ip-api.com/json/?lang=zh-CN&fields=status,message,query,country,countryCode,regionName,city,isp,org,as,asname,proxy,hosting,mobile&_=" +
-          Date.now()
+          Date.now(),
+        MAIN_POLICY
       ),
-      getJSON("https://ipwho.is/?lang=zh-CN&_=" + Date.now()),
-      getJSON("https://ipinfo.io/json?_=" + Date.now())
+      getJSONPolicy("https://ipwho.is/?lang=zh-CN&_=" + Date.now(), MAIN_POLICY),
+      getJSONPolicy("https://ipinfo.io/json?_=" + Date.now(), MAIN_POLICY)
     ]);
 
     const sourceNames = [
@@ -863,9 +959,9 @@ export default async function (ctx) {
   }
 
   async function getProxyLatency() {
-    const measured = await measureLatencySet(
+    const measured = await measureLatencySetPolicy(
       GLOBAL_PROXY_LATENCY_URLS,
-      false
+      MAIN_POLICY
     );
 
     return {
@@ -972,7 +1068,7 @@ export default async function (ctx) {
 
     const results = await Promise.all(
       urls.map(function (url) {
-        return getText(url);
+        return getTextPolicy(url, MAIN_POLICY);
       })
     );
 
@@ -1390,7 +1486,7 @@ export default async function (ctx) {
       [
         row(
           [
-            iconBox("waveform.path.ecg", C.blue, C.blueSoft, 28),
+            iconBox("waveform.path.ecg", C.blue, C.blueSoft, 30),
 
             col(
               [
@@ -1445,10 +1541,10 @@ export default async function (ctx) {
                 row(
                   [
                     text(
-                      POLICY ? "●" : "○",
+                      MAIN_POLICY ? "●" : "○",
                       7,
                       "bold",
-                      POLICY ? C.green : C.purple
+                      MAIN_POLICY ? C.green : C.purple
                     ),
 
                     text(POLICY_LABEL, 7, "semibold", C.text, {
@@ -1520,7 +1616,7 @@ export default async function (ctx) {
 
         row(
           [
-            iconBox("wifi", C.blue, C.blueSoft, 42),
+            iconBox("wifi", C.blue, C.blueSoft, 46),
 
             col(
               [
@@ -1612,7 +1708,7 @@ export default async function (ctx) {
       ],
       {
         flex: 1,
-        height: 100
+        height: 106
       }
     );
   }
@@ -1802,7 +1898,7 @@ export default async function (ctx) {
       ],
       {
         flex: 1,
-        height: 100,
+        height: 106,
         padding: [5, 6],
         gap: 3
       }
@@ -1997,7 +2093,7 @@ export default async function (ctx) {
       ],
       {
         flex: 1,
-        height: 31,
+        height: 34,
         padding: [4, 4],
         gap: 4,
         backgroundColor: C.tileBg,
@@ -2017,7 +2113,7 @@ export default async function (ctx) {
             compactServiceTile(items[1])
           ],
           {
-            height: 31,
+            height: 34,
             gap: 5
           }
         ),
@@ -2028,7 +2124,7 @@ export default async function (ctx) {
             compactServiceTile(items[3])
           ],
           {
-            height: 31,
+            height: 34,
             gap: 5
           }
         ),
@@ -2039,14 +2135,14 @@ export default async function (ctx) {
             compactServiceTile(items[5])
           ],
           {
-            height: 31,
+            height: 34,
             gap: 5
           }
         )
       ],
       {
         flex: 1,
-        height: 101,
+        height: 110,
         gap: 4
       }
     );
@@ -2072,7 +2168,7 @@ export default async function (ctx) {
       ],
       {
         flex: 1,
-        height: 133,
+        height: 146,
         padding: [5, 6],
         gap: 5
       }
@@ -2158,7 +2254,7 @@ export default async function (ctx) {
             )
           ],
           {
-            height: 30,
+            height: 34,
             padding: [0, 0],
             gap: 0,
             alignItems: "center"
@@ -2183,7 +2279,7 @@ export default async function (ctx) {
           proxyCard()
         ],
         {
-          height: 100,
+          height: 106,
           gap: 6,
           alignItems: "start"
         }
@@ -2195,7 +2291,7 @@ export default async function (ctx) {
           serviceCard("AI 解锁检测", "sparkles", ai, C.purple)
         ],
         {
-          height: 133,
+          height: 146,
           gap: 6,
           alignItems: "start"
         }
@@ -2204,9 +2300,10 @@ export default async function (ctx) {
       footer()
     ],
     {
-      height: 342,
+      // Glass fork: 大号自适应——flex 撑满 widget 高度，不留底边空白（原固定 342 在 iPhone Air 大号上留白）
+      flex: 1,
       padding: [8, 8],
-      gap: 6
+      gap: 7
     }
   );
 

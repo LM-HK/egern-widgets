@@ -7,8 +7,12 @@ icon: "waveform.path.ecg"
 env_schema:
   POLICY:
     name: 统一策略
-    description: "指定后出口、延迟、UDP/QUIC、流媒体、AI 全部统一走该策略，留空用默认规则"
+    description: "指定后流媒体与 AI 检测统一走该策略，留空自动匹配各自分组；出口、延迟、UDP/QUIC 由当前代理策略决定"
     default_value: ""
+  MAIN_POLICY:
+    name: 当前代理策略
+    description: "当前代理的出口、延迟与 UDP/QUIC 走这个策略组，默认花云；不影响流媒体与 AI 检测"
+    default_value: "花云"
   LMT:
     name: 流媒体策略
     description: "流媒体检测走的策略组，POLICY 为空时生效，留空自动匹配"
