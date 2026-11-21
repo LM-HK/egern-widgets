@@ -6,7 +6,7 @@
  * classic 为原版。文字、品牌色、纯净评分仪表盘（SVG）原样保留。
  *
  * 环境变量：
- * - POLICY：最高优先级。指定后，出口、延迟、UDP/QUIC、流媒体、AI 全部统一走 POLICY
+ * - POLICY：最高优先级。指定后，出口、延迟、流媒体、AI 全部统一走 POLICY
  * - LMT：流媒体检测策略组。POLICY 为空时生效
  * - AI：AI 检测策略组。POLICY 为空时生效
  * - YS=1：显示 IP 的地方启用隐私打码，例如 123.123.123.123 -> 123.123.*.*
@@ -33,7 +33,7 @@ export default async function (ctx) {
   const SCHEME = detectScheme(ctx);
 
   const POLICY = clean(env.POLICY);
-  // Glass fork: 当前代理（出口、延迟、UDP/QUIC）固定走 MAIN_POLICY，默认花云；不影响流媒体与 AI 各自的分组
+  // Glass fork: 当前代理（出口、延迟）固定走 MAIN_POLICY，默认花云；不影响流媒体与 AI 各自的分组
   const MAIN_POLICY = clean(env.MAIN_POLICY) || "花云";
   const POLICY_LABEL = MAIN_POLICY || POLICY || "默认规则";
   const LMT_POLICY = clean(env.LMT);
@@ -95,14 +95,6 @@ export default async function (ctx) {
     "https://cp.cloudflare.com/generate_204",
     "https://www.gstatic.com/generate_204",
     "https://www.cloudflare.com/favicon.ico"
-  ];
-
-  const QUIC_TRACE_URLS = [
-    "https://cloudflare-quic.com/cdn-cgi/trace",
-    "https://cloudflare.com/cdn-cgi/trace",
-    "https://www.cloudflare.com/cdn-cgi/trace",
-    "https://one.one.one.one/cdn-cgi/trace",
-    "https://1.1.1.1/cdn-cgi/trace"
   ];
 
   // Glass fork: 按用户要求换服务——流媒体：Emby / Instagram / X（替换 Netflix / Disney+ / Prime）；
@@ -344,7 +336,7 @@ export default async function (ctx) {
     }
   }
 
-  // Glass fork: 按指定策略发请求（给当前代理的出口/延迟/QUIC 用）
+  // Glass fork: 按指定策略发请求（给当前代理的出口/延迟用）
   async function getJSONPolicy(url, policy) {
     try {
       const response = await ctx.http.get(url, serviceRequestOptions(policy));
@@ -1061,57 +1053,6 @@ export default async function (ctx) {
     return parseProxyCheck(result.data, target);
   }
 
-  async function getQuic() {
-    const urls = QUIC_TRACE_URLS.map(function (url) {
-      return url + "?_=" + Date.now() + randomAlphaNum(5);
-    });
-
-    const results = await Promise.all(
-      urls.map(function (url) {
-        return getTextPolicy(url, MAIN_POLICY);
-      })
-    );
-
-    let hasH3 = false;
-    let hasReachable = false;
-
-    for (let index = 0; index < results.length; index += 1) {
-      const item = results[index];
-
-      if (!item || !item.ok) {
-        continue;
-      }
-
-      hasReachable = true;
-
-      const trace = parseTrace(item.text);
-      const protocol = clean(trace.http).toLowerCase();
-
-      if (
-        protocol === "h3" ||
-        protocol === "http3" ||
-        protocol === "http/3" ||
-        protocol.includes("h3") ||
-        protocol.includes("http/3")
-      ) {
-        hasH3 = true;
-        break;
-      }
-    }
-
-    if (hasH3) {
-      return {
-        value: "✓/✓",
-        tone: "green"
-      };
-    }
-
-    return {
-      value: "×/×",
-      tone: hasReachable ? "amber" : "red"
-    };
-  }
-
   async function testService(id, name, kind, color, url, servicePolicy) {
     const serviceExitPromise = getPolicyExit(servicePolicy);
 
@@ -1171,7 +1112,6 @@ export default async function (ctx) {
     verifiedDNS,
     proxyLatency,
     localLatency,
-    quic,
     media,
     ai
   ] = await Promise.all([
@@ -1180,7 +1120,6 @@ export default async function (ctx) {
     getDNSVerified(),
     getProxyLatency(),
     getLocalLatency(),
-    getQuic(),
 
     Promise.all([
       testService("emby", "Emby", "emby", C.emby, "https://emby.media/", mediaPolicyMap.emby),
@@ -1234,7 +1173,6 @@ export default async function (ctx) {
     : C.red;
 
   const natColor = toneColor(nat.tone, C);
-  const quicColor = toneColor(quic.tone, C);
 
   const purityColor =
     purity.score >= 75 ? C.green :
@@ -1858,17 +1796,6 @@ export default async function (ctx) {
               "NAT",
               nat.label,
               natColor
-            ),
-
-            metricBox(
-              "paperplane.fill",
-              "UDP/QUIC",
-              quic.value,
-              quicColor,
-              {
-                labelSize: 4.25,
-                labelMinScale: 0.38
-              }
             ),
 
             metricBox(
