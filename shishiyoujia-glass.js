@@ -422,8 +422,8 @@ export default async function (ctx) {
 
     return {
       type: "stack", direction: "column", alignItems: "center", flex: 1,
-      backgroundColor: C.card, borderRadius: config.radius, padding: config.padding,
-      borderWidth: 0.5, borderColor: C.cardBorder,   // IBL3ND 同款描边，立体感
+      backgroundColor: glass ? '#00000000' : C.card, borderRadius: config.radius, padding: config.padding,
+      borderWidth: glass ? 0 : 0.5, borderColor: C.cardBorder,   // IBL3ND 同款描边，立体感；玻璃模式下去掉底框
       children: [
         mkSpacer(),
         mkText(item.label, config.labelFz, config.labelWeight, item.color),
