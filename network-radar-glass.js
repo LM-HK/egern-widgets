@@ -103,22 +103,24 @@ export default async function (ctx) {
     "https://1.1.1.1/cdn-cgi/trace"
   ];
 
+  // Glass fork: 按用户要求换服务——流媒体：Emby / Instagram / X（替换 Netflix / Disney+ / Prime）；
+  // AI：Muse（Meta AI）/ 豆包（替换 Claude / Perplexity）；其余不动
   const MEDIA_SERVICE_IDS = [
-    "netflix",
-    "disney",
+    "emby",
+    "instagram",
     "spotify",
     "tiktok",
     "youtube",
-    "prime"
+    "x"
   ];
 
   const AI_SERVICE_IDS = [
     "chatgpt",
-    "claude",
+    "muse",
     "gemini",
     "deepseek",
     "grok",
-    "perplexity"
+    "doubao"
   ];
 
   const device = ctx.device || {};
@@ -1085,21 +1087,21 @@ export default async function (ctx) {
     getQuic(),
 
     Promise.all([
-      testService("netflix", "Netflix", "netflix", C.netflix, "https://www.netflix.com/title/81215567", mediaPolicyMap.netflix),
-      testService("disney", "Disney+", "disney", C.disney, "https://www.disneyplus.com/", mediaPolicyMap.disney),
+      testService("emby", "Emby", "emby", C.emby, "https://emby.media/", mediaPolicyMap.emby),
+      testService("instagram", "Instagram", "instagram", C.instagram, "https://www.instagram.com/", mediaPolicyMap.instagram),
       testService("spotify", "Spotify", "spotify", C.spotify, "https://open.spotify.com/", mediaPolicyMap.spotify),
       testService("tiktok", "TikTok", "tiktok", C.tiktok, "https://www.tiktok.com/", mediaPolicyMap.tiktok),
       testService("youtube", "YouTube", "youtube", C.youtube, "https://www.youtube.com/", mediaPolicyMap.youtube),
-      testService("prime", "Prime", "prime", C.prime, "https://www.primevideo.com/", mediaPolicyMap.prime)
+      testService("x", "X", "x", C.x, "https://x.com/", mediaPolicyMap.x)
     ]),
 
     Promise.all([
       testService("chatgpt", "ChatGPT", "chatgpt", C.chatgpt, "https://chatgpt.com/", aiPolicyMap.chatgpt),
-      testService("claude", "Claude", "claude", C.claude, "https://claude.ai/", aiPolicyMap.claude),
+      testService("muse", "Muse", "muse", C.muse, "https://www.meta.ai/", aiPolicyMap.muse),
       testService("gemini", "Gemini", "gemini", C.gemini, "https://gemini.google.com/", aiPolicyMap.gemini),
       testService("deepseek", "DeepSeek", "deepseek", C.deepseek, "https://chat.deepseek.com/", aiPolicyMap.deepseek),
       testService("grok", "Grok", "grok", C.grok, "https://grok.com/", aiPolicyMap.grok),
-      testService("perplexity", "Perplexity", "perplexity", C.perplexity, "https://www.perplexity.ai/", aiPolicyMap.perplexity)
+      testService("doubao", "豆包", "doubao", C.doubao, "https://www.doubao.com/", aiPolicyMap.doubao)
     ])
   ]);
 
@@ -1852,6 +1854,15 @@ export default async function (ctx) {
       );
     }
 
+    if (item.kind === "instagram") {
+      return row(
+        [
+          image("camera.fill", item.color, 15, 15)
+        ],
+        base
+      );
+    }
+
     if (item.kind === "chatgpt") {
       return row(
         [
@@ -1895,7 +1906,15 @@ export default async function (ctx) {
           ? "D+"
           : item.kind === "deepseek"
             ? "D"
-            : "AI";
+            : item.kind === "emby"
+              ? "E"
+              : item.kind === "x"
+                ? "X"
+                : item.kind === "muse"
+                  ? "M"
+                  : item.kind === "doubao"
+                    ? "豆"
+                    : "AI";
 
     const fontSize =
       item.kind === "claude"
@@ -2270,7 +2289,14 @@ function palette(glass) {
     gemini: adaptive("#6D6FE8", "#9EA9FF"),
     deepseek: adaptive("#1D6FD8", "#61AAFF"),
     grok: adaptive("#111827", "#F1F5FF"),
-    perplexity: adaptive("#0B88A8", "#63D9FF")
+    perplexity: adaptive("#0B88A8", "#63D9FF"),
+
+    // Glass fork: 用户换上的服务（原 Netflix / Disney+ / Prime / Claude / Perplexity 的颜色保留未用）
+    emby: adaptive("#52B54B", "#6FD668"),
+    instagram: adaptive("#E1306C", "#FF7AB8"),
+    x: adaptive("#111827", "#FFFFFF"),
+    muse: adaptive("#0082FB", "#6CB2FF"),
+    doubao: adaptive("#4D6BFE", "#8AA5FF")
   };
 }
 
@@ -2490,6 +2516,13 @@ function servicePolicyCandidates(serviceId, category) {
       "🎥 Disney"
     ],
 
+    emby: [
+      // Glass fork: 用户分组名就是 Emby，放最前面优先匹配
+      "Emby",
+      "EMBY",
+      "Emby Server"
+    ],
+
     spotify: [
       // Glass fork: 用户配置里的分组名是小写 spotify（上游写 Spotify，大小写对不上匹配不到），放最前面优先匹配
       "spotify",
@@ -2532,6 +2565,14 @@ function servicePolicyCandidates(serviceId, category) {
       "🎬 TikTok"
     ],
 
+    instagram: [
+      // Glass fork: 用户分组名就是 Instagram，放最前面优先匹配
+      "Instagram",
+      "INSTAGRAM",
+      "Ins",
+      "IG"
+    ],
+
     youtube: [
       "YouTube",
       "Youtube",
@@ -2555,6 +2596,13 @@ function servicePolicyCandidates(serviceId, category) {
       "🎬 YouTube",
       "📺 YouTube",
       "▶️ YouTube"
+    ],
+
+    x: [
+      // Glass fork: 用户分组名就是 X，放最前面优先匹配
+      "X",
+      "Twitter",
+      "推特"
     ],
 
     prime: [
@@ -2607,6 +2655,13 @@ function servicePolicyCandidates(serviceId, category) {
       "✨ ChatGPT"
     ],
 
+    muse: [
+      // Glass fork: 用户分组名就是 Muse（Meta AI 的分组），放最前面优先匹配
+      "Muse",
+      "Meta AI",
+      "MetaAI"
+    ],
+
     claude: [
       "Claude",
       "Anthropic",
@@ -2643,7 +2698,16 @@ function servicePolicyCandidates(serviceId, category) {
       "✨ Gemini"
     ],
 
+    doubao: [
+      // Glass fork: 用户要求直连，DIRECT 放最前面（Egern 内置直连策略）
+      "DIRECT",
+      "Doubao",
+      "豆包"
+    ],
+
     deepseek: [
+      // Glass fork: 用户要求直连，DIRECT 放最前面
+      "DIRECT",
       "DeepSeek",
       "Deepseek",
       "DEEPSEEK",
@@ -2659,6 +2723,8 @@ function servicePolicyCandidates(serviceId, category) {
     ],
 
     grok: [
+      // Glass fork: 用户要求 Grok 走 X 的分组节点，X 放最前面优先匹配
+      "X",
       "Grok",
       "grok",
       "GROK",
