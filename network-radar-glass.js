@@ -119,7 +119,7 @@ export default async function (ctx) {
     "muse",
     "gemini",
     "deepseek",
-    "grok",
+    "appleai",
     "doubao"
   ];
 
@@ -1092,15 +1092,15 @@ export default async function (ctx) {
       testService("spotify", "Spotify", "spotify", C.spotify, "https://open.spotify.com/", mediaPolicyMap.spotify),
       testService("tiktok", "TikTok", "tiktok", C.tiktok, "https://www.tiktok.com/", mediaPolicyMap.tiktok),
       testService("youtube", "YouTube", "youtube", C.youtube, "https://www.youtube.com/", mediaPolicyMap.youtube),
-      testService("x", "X", "x", C.x, "https://x.com/", mediaPolicyMap.x)
+      testService("x", "X", "x", C.x, "https://api.x.com/", mediaPolicyMap.x)
     ]),
 
     Promise.all([
       testService("chatgpt", "ChatGPT", "chatgpt", C.chatgpt, "https://chatgpt.com/", aiPolicyMap.chatgpt),
       testService("muse", "Muse", "muse", C.muse, "https://www.meta.ai/", aiPolicyMap.muse),
-      testService("gemini", "Gemini", "gemini", C.gemini, "https://gemini.google.com/", aiPolicyMap.gemini),
+      testService("gemini", "Gemini", "gemini", C.gemini, "https://generativelanguage.googleapis.com/", aiPolicyMap.gemini),
       testService("deepseek", "DeepSeek", "deepseek", C.deepseek, "https://chat.deepseek.com/", aiPolicyMap.deepseek),
-      testService("grok", "Grok", "grok", C.grok, "https://grok.com/", aiPolicyMap.grok),
+      testService("appleai", "苹果AI", "appleai", C.appleai, "https://guzzoni.apple.com/", aiPolicyMap.appleai),
       testService("doubao", "豆包", "doubao", C.doubao, "https://www.doubao.com/", aiPolicyMap.doubao)
     ])
   ]);
@@ -1863,6 +1863,15 @@ export default async function (ctx) {
       );
     }
 
+    if (item.kind === "appleai") {
+      return row(
+        [
+          image("apple.logo", item.color, 15, 15)
+        ],
+        base
+      );
+    }
+
     if (item.kind === "chatgpt") {
       return row(
         [
@@ -2296,7 +2305,8 @@ function palette(glass) {
     instagram: adaptive("#E1306C", "#FF7AB8"),
     x: adaptive("#111827", "#FFFFFF"),
     muse: adaptive("#0082FB", "#6CB2FF"),
-    doubao: adaptive("#4D6BFE", "#8AA5FF")
+    doubao: adaptive("#4D6BFE", "#8AA5FF"),
+    appleai: adaptive("#111827", "#FFFFFF")
   };
 }
 
@@ -2660,6 +2670,14 @@ function servicePolicyCandidates(serviceId, category) {
       "Muse",
       "Meta AI",
       "MetaAI"
+    ],
+
+    appleai: [
+      // Glass fork: 用户分组名就是 Apple-Intelligence，放最前面优先匹配
+      "Apple-Intelligence",
+      "Apple Intelligence",
+      "苹果 AI",
+      "Apple AI"
     ],
 
     claude: [
