@@ -1585,22 +1585,11 @@ export default async function (ctx) {
               }
             )
           ],
-          { gap: 6 }
+          { gap: 2 }
         ),
 
         row(
           [
-            metricBox(
-              "router.fill",
-              "网关",
-              gatewayLabel(displayIP(gateway)),
-              C.blue,
-              {
-                valueSize: 5.4,
-                valueMinScale: 0.28
-              }
-            ),
-
             metricBox(
               "clock",
               "直连延迟",
