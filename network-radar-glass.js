@@ -91,6 +91,10 @@ export default async function (ctx) {
     "https://www.cloudflare.com/favicon.ico"
   ];
 
+  // Glass fork: 直连测速（1MB，Cloudflare speed test，直连不走代理）
+  const DIRECT_SPEED_URL = "https://speed.cloudflare.com/__down?bytes=1000000";
+  const DIRECT_SPEED_BYTES = 1000000;
+
   const POLICY_PROBE_URLS = [
     "https://cp.cloudflare.com/generate_204",
     "https://www.gstatic.com/generate_204",
@@ -976,6 +980,23 @@ export default async function (ctx) {
     };
   }
 
+  async function getDirectSpeed() {
+    const startedAt = Date.now();
+
+    try {
+      const response = await ctx.http.get(DIRECT_SPEED_URL, directRequestOptions());
+      if (!response || response.status < 200 || response.status >= 400) {
+        return { ok: false, mbps: 0 };
+      }
+      await response.text();
+      const ms = Math.max(1, Date.now() - startedAt);
+      const mbps = (DIRECT_SPEED_BYTES * 8) / (ms / 1000) / 1e6;
+      return { ok: true, mbps: mbps };
+    } catch (_) {
+      return { ok: false, mbps: 0 };
+    }
+  }
+
   async function measureLatencySet(urls, direct) {
     const results = await Promise.all(
       urls.map(function (url) {
@@ -1112,6 +1133,7 @@ export default async function (ctx) {
     verifiedDNS,
     proxyLatency,
     localLatency,
+    directSpeed,
     media,
     ai
   ] = await Promise.all([
@@ -1120,6 +1142,7 @@ export default async function (ctx) {
     getDNSVerified(),
     getProxyLatency(),
     getLocalLatency(),
+    getDirectSpeed(),
 
     Promise.all([
       testService("emby", "Emby", "emby", C.emby, "https://emby.media/", mediaPolicyMap.emby),
@@ -1583,9 +1606,21 @@ export default async function (ctx) {
                 flex: 1,
                 gap: 1
               }
+            ),
+
+            row(
+              [
+                speedGauge()
+              ],
+              {
+                width: 68,
+                height: 52,
+                alignItems: "center",
+                justifyContent: "center"
+              }
             )
           ],
-          { gap: 2 }
+          { gap: 4 }
         ),
 
         row(
@@ -1651,6 +1686,28 @@ export default async function (ctx) {
     return svgImage(
       purityGaugeSVG(
         purity.score,
+        {
+          track: uiColor(C.scoreTrack),
+          left: uiColor(C.scoreLeft),
+          right: uiColor(C.scoreRight),
+          glow: uiColor(C.scoreGlow),
+          text: uiColor(C.scoreLeft),
+          muted: uiColor(C.muted)
+        }
+      ),
+      78,
+      60,
+      {
+        borderRadius: 16
+      }
+    );
+  }
+
+  function speedGauge() {
+    return svgImage(
+      speedGaugeSVG(
+        directSpeed.ok ? directSpeed.mbps : 0,
+        directSpeed.ok,
         {
           track: uiColor(C.scoreTrack),
           left: uiColor(C.scoreLeft),
@@ -3099,6 +3156,56 @@ function purityGaugeSVG(score, colors) {
     '<text x="75" y="61" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif" font-size="30" font-weight="850" fill="' + safeText + '">' + Math.round(value) + "</text>",
     '<text x="75" y="75" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif" font-size="10" font-weight="760" fill="' + safeMuted + '">/100</text>',
     '<text x="75" y="90" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif" font-size="10" font-weight="760" fill="' + safeMuted + '">纯净评分</text>',
+    "</svg>"
+  ].join("");
+}
+
+function speedGaugeSVG(mbps, ok, colors) {
+  const pct = ok ? Math.max(0, Math.min(100, Number(mbps) || 0)) : 0;
+
+  const cx = 75;
+  const cy = 85;
+  const rx = 55;
+  const ry = 55;
+
+  const theta = Math.PI - Math.PI * pct / 100;
+  const px = cx + rx * Math.cos(theta);
+  const py = cy - ry * Math.sin(theta);
+
+  const safeTrack = svgColor(colors.track, "#D8E1EA");
+  const safeLeft = svgColor(colors.left, "#22C96D");
+  const safeRight = svgColor(colors.right, "#E25769");
+  const safeGlow = svgColor(colors.glow, "#1AE27F");
+  const safeText = svgColor(colors.text, "#22C96D");
+  const safeMuted = svgColor(colors.muted, "#74839A");
+
+  const leftDash =
+    pct >= 99.9
+      ? "100 0"
+      : Math.max(0.1, pct).toFixed(1) + " 100";
+
+  const centerText = ok ? String(Math.round(Number(mbps) || 0)) : "—";
+
+  return [
+    '<svg xmlns="http://www.w3.org/2000/svg" width="150" height="112" viewBox="0 0 150 112">',
+    "<defs>",
+    '<filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">',
+    '<feGaussianBlur stdDeviation="2.1" result="blur"/>',
+    "<feMerge>",
+    '<feMergeNode in="blur"/>',
+    '<feMergeNode in="SourceGraphic"/>',
+    "</feMerge>",
+    "</filter>",
+    "</defs>",
+    '<path d="M20 85 A55 55 0 0 1 130 85" fill="none" stroke="' + safeTrack + '" stroke-width="9" stroke-linecap="round" opacity="0.75"/>',
+    '<path d="M20 85 A55 55 0 0 1 130 85" fill="none" stroke="' + safeRight + '" stroke-width="8.2" stroke-linecap="round" opacity="0.95"/>',
+    '<path d="M20 85 A55 55 0 0 1 130 85" fill="none" stroke="' + safeGlow + '" stroke-width="13" stroke-linecap="round" pathLength="100" stroke-dasharray="' + leftDash + '" opacity="0.16"/>',
+    '<path d="M20 85 A55 55 0 0 1 130 85" fill="none" stroke="' + safeLeft + '" stroke-width="8.4" stroke-linecap="round" pathLength="100" stroke-dasharray="' + leftDash + '" opacity="1"/>',
+    '<circle cx="' + px.toFixed(2) + '" cy="' + py.toFixed(2) + '" r="6.5" fill="' + safeGlow + '" opacity="0.20"/>',
+    '<circle cx="' + px.toFixed(2) + '" cy="' + py.toFixed(2) + '" r="4.2" fill="' + safeLeft + '" filter="url(#softGlow)" opacity="1"/>',
+    '<text x="75" y="61" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif" font-size="30" font-weight="850" fill="' + safeText + '">' + centerText + "</text>",
+    '<text x="75" y="75" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif" font-size="10" font-weight="760" fill="' + safeMuted + '">Mbps</text>',
+    '<text x="75" y="90" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif" font-size="10" font-weight="760" fill="' + safeMuted + '">直连速度</text>',
     "</svg>"
   ].join("");
 }
