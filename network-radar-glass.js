@@ -1486,7 +1486,7 @@ export default async function (ctx) {
       [
         row(
           [
-            iconBox("waveform.path.ecg", C.blue, C.blueSoft, 32),
+            iconBox("waveform.path.ecg", C.blue, C.blueSoft, 34),
 
             col(
               [
@@ -1616,7 +1616,7 @@ export default async function (ctx) {
 
         row(
           [
-            iconBox("wifi", C.blue, C.blueSoft, 52),
+            iconBox("wifi", C.blue, C.blueSoft, 54),
 
             col(
               [
@@ -1708,7 +1708,7 @@ export default async function (ctx) {
       ],
       {
         flex: 1,
-        height: 112
+        height: 116
       }
     );
   }
@@ -1722,8 +1722,8 @@ export default async function (ctx) {
         })
       ],
       {
-        width: 40,
-        height: 40,
+        width: 42,
+        height: 42,
         padding: 2,
         backgroundColor: C.purpleSoft,
         borderRadius: 11
@@ -1744,8 +1744,8 @@ export default async function (ctx) {
           muted: uiColor(C.muted)
         }
       ),
-      68,
-      52,
+      72,
+      55,
       {
         borderRadius: 16
       }
@@ -1898,7 +1898,7 @@ export default async function (ctx) {
       ],
       {
         flex: 1,
-        height: 112,
+        height: 116,
         padding: [5, 6],
         gap: 3
       }
@@ -1907,8 +1907,8 @@ export default async function (ctx) {
 
   function serviceLogoLarge(item) {
     const base = {
-      width: 25,
-      height: 25,
+      width: 26,
+      height: 26,
       padding: 2,
       backgroundColor: C.tileIconBg,
       borderRadius: 7
@@ -2055,7 +2055,7 @@ export default async function (ctx) {
 
         col(
           [
-            text(item.name, 8, "semibold", C.text, {
+            text(item.name, 9, "semibold", C.text, {
               maxLines: 1,
               minScale: 0.66
             }),
@@ -2074,7 +2074,7 @@ export default async function (ctx) {
 
                 text(
                   item.ok ? "OK" : "失败",
-                  6,
+                  6.5,
                   "semibold",
                   statusColor,
                   {
@@ -2093,8 +2093,8 @@ export default async function (ctx) {
       ],
       {
         flex: 1,
-        height: 37,
-        padding: [5, 5],
+        height: 39,
+        padding: [6, 6],
         gap: 4,
         backgroundColor: C.tileBg,
         borderRadius: 9,
@@ -2113,7 +2113,7 @@ export default async function (ctx) {
             compactServiceTile(items[1])
           ],
           {
-            height: 37,
+            height: 39,
             gap: 5
           }
         ),
@@ -2124,7 +2124,7 @@ export default async function (ctx) {
             compactServiceTile(items[3])
           ],
           {
-            height: 37,
+            height: 39,
             gap: 5
           }
         ),
@@ -2135,14 +2135,14 @@ export default async function (ctx) {
             compactServiceTile(items[5])
           ],
           {
-            height: 37,
+            height: 39,
             gap: 5
           }
         )
       ],
       {
         flex: 1,
-        height: 115,
+        height: 125,
         gap: 4
       }
     );
@@ -2168,7 +2168,7 @@ export default async function (ctx) {
       ],
       {
         flex: 1,
-        height: 150,
+        height: 160,
         padding: [6, 7],
         gap: 5
       }
@@ -2180,15 +2180,15 @@ export default async function (ctx) {
       [
         row(
           [
-            image(symbol, tone, 15, 15),
+            image(symbol, tone, 16, 16),
 
             col(
               [
-                text(label, 7, "medium", C.muted, {
+                text(label, 8, "medium", C.muted, {
                   maxLines: 1
                 }),
 
-                text(value, 8, "semibold", tone, {
+                text(value, 9, "semibold", tone, {
                   maxLines: 1,
                   minScale: 0.64
                 })
@@ -2263,7 +2263,7 @@ export default async function (ctx) {
       ],
       {
         height: 40,
-        padding: [6, 6],
+        padding: [5, 5],
         gap: 0
       }
     );
@@ -2279,7 +2279,7 @@ export default async function (ctx) {
           proxyCard()
         ],
         {
-          height: 112,
+          height: 116,
           gap: 6,
           alignItems: "start"
         }
@@ -2291,7 +2291,7 @@ export default async function (ctx) {
           serviceCard("AI 解锁检测", "sparkles", ai, C.purple)
         ],
         {
-          height: 150,
+          height: 160,
           gap: 6,
           alignItems: "start"
         }
@@ -2302,14 +2302,14 @@ export default async function (ctx) {
     {
       // Glass fork: 大号自适应——flex 撑满 widget 高度，不留底边空白（原固定 342 在 iPhone Air 大号上留白）
       flex: 1,
-      padding: [6, 6],
+      padding: [2, 2],
       gap: 8
     }
   );
 
   return {
     type: "widget",
-    padding: S(6),
+    padding: S(2),
     gap: 0,
     backgroundColor: C.root,
     refreshAfter: new Date(
