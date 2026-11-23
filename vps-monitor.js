@@ -40,16 +40,18 @@ function storageKey(host) {
 
 function readConfig(ctx) {
   const env = ctx.env || {};
+  // 注意：Egern 的 env_schema default_value 只是占位提示，不会自动写入 env，
+  // 所以脚本里必须给默认值，否则只填密码时 SERVER_HOST 为空、组件显示“等待服务器配置”
   return {
-    host: String(env.SERVER_HOST || '').trim(),
+    host: String(env.SERVER_HOST || '104.223.113.184').trim(),
     port: Number(env.SERVER_PORT) || 22,
     username: String(env.SERVER_USER || 'root').trim() || 'root',
     password: String(env.SERVER_PASSWORD || ''),
     privateKey: String(env.SERVER_KEY || ''),
-    name: String(env.WIDGET_NAME || '').trim(),
+    name: String(env.WIDGET_NAME || 'RackNerd').trim(),
     maskIp: String(env.MASK_IP ?? 'true') !== 'false',
-    trafficLimitGB: Number(env.TRAFFIC_LIMIT) || 2000,
-    resetDay: Number(env.RESET_DAY) || 1,
+    trafficLimitGB: Number(env.TRAFFIC_LIMIT) || 3072,
+    resetDay: Number(env.RESET_DAY) || 22,
   };
 }
 
@@ -539,7 +541,7 @@ function smallWidget(ctx, s) {
 
 function mediumWidget(ctx, s) {
   const d = s.data;
-  const r = nextReset(ctx.env?.RESET_DAY || 1);
+  const r = nextReset(ctx.env?.RESET_DAY || 22);
   const tColor = trafficColor(d.tfPct);
 
   const ringValues = [
@@ -602,7 +604,7 @@ function infoCell(k, v) {
 
 function largeWidget(ctx, s) {
   const d = s.data;
-  const r = nextReset(ctx.env?.RESET_DAY || 1);
+  const r = nextReset(ctx.env?.RESET_DAY || 22);
   const tColor = trafficColor(d.tfPct);
   return frame(ctx, { padding: [14, 16], gap: 9, children: [
       header(s),
