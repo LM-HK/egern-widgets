@@ -1,7 +1,10 @@
 /**
  * ════════════════════════════════════════════════════
  *  虚拟货币价格小组件
- *  数据源：Binance API（无需 Key）
+ *  数据源：Binance Vision（主）+ CoinGecko（备用），均无需 Key
+ *  2026-11-23 优化：币安主站 api.binance.com 在中国和美国都会返回 451（地区限制），
+ *  所以小组件一直报错；改用币安公开行情接口 data-api.binance.vision（同款返回格式），
+ *  失败时再走 CoinGecko /coins/markets 补齐；全部失败则显示上次缓存的数据，不再整页报错。
  *
  * Glass fork: 透明版（WIDGET_STYLE 开关，glass 默认透明 / classic 原版）
  * 原版根背景未设置、走 Egern 默认；glass 下根背景显式透明，classic 用 theme.bg。
@@ -54,7 +57,22 @@ export default async function(ctx) {
   // 没有传入尺寸时（例如脚本预览），按小尺寸处理
   const widgetFamily = ctx.widgetFamily || "systemSmall";
   const btcType = ctx.env?.btcType || "BTC,ETH,BNB";
-  const API = "https://api.binance.com/api/v3";
+  // 币安主站 api.binance.com 在中国和美国都会返回 451（地区限制），改用币安公开行情接口
+  // data-api.binance.vision：同款返回格式，无需 Key，中国/美国都能访问
+  const API = "https://data-api.binance.vision/api/v3";
+  const COINGECKO_API = "https://api.coingecko.com/api/v3";
+  const CACHE_KEY = "crypto-glass.cache.v1";
+
+  // CoinGecko 币种 ID（备用接口用）
+  const COINGECKO_ID = {
+    "BTC": "bitcoin", "ETH": "ethereum", "BNB": "binancecoin",
+    "SOL": "solana", "XRP": "ripple", "ADA": "cardano",
+    "DOGE": "dogecoin", "DOT": "polkadot", "MATIC": "matic-network",
+    "AVAX": "avalanche-2", "LINK": "chainlink", "UNI": "uniswap",
+    "SHIB": "shiba-inu", "PEPE": "pepe", "FLOKI": "floki",
+    "BONK": "bonk", "WIF": "dogwifcoin", "BOME": "book-of-meme",
+    "TRX": "tron", "LTC": "litecoin", "APT": "aptos"
+  };
 
   // ── 刷新工具：refreshAfter 必须为 ISO 8601 时间戳 ──
   const refreshAfter = (ms) => new Date(Date.now() + ms).toISOString();
@@ -87,9 +105,31 @@ export default async function(ctx) {
     return price.toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 8 });
   };
 
-  // 返回 { coins, failed }：failed 为获取失败的币种符号列表
+  // 备用：CoinGecko 一次拉取多个币种（/coins/markets），返回与主接口同款 coin 对象
+  const fetchFromCoinGecko = async (baseSymbols) => {
+    const ids = baseSymbols.map(s => COINGECKO_ID[s]).filter(Boolean);
+    if (!ids.length) return [];
+    try {
+      const resp = await ctx.http.get(`${COINGECKO_API}/coins/markets?vs_currency=usd&ids=${ids.join(",")}&price_change_percentage=24h`, { timeout: 8000 });
+      const list = await resp.json();
+      if (!Array.isArray(list)) return [];
+      return list.map(c => ({
+        symbol: String(c.symbol || "").toUpperCase(),
+        name: c.name || String(c.symbol || "").toUpperCase(),
+        price: Number(c.current_price) || 0,
+        high: Number(c.high_24h) || 0,
+        low: Number(c.low_24h) || 0,
+        change: Number(c.price_change_percentage_24h) || 0,
+        volume: Number(c.total_volume) || 0
+      })).filter(c => c.symbol && c.price > 0);
+    } catch { return []; }
+  };
+
+  // 返回 { coins, failed, stale }：stale 表示用的是缓存数据
   const fetchPrices = async () => {
     const symbols = parseSymbols(btcType);
+    const coins = [];
+    const failed = [];
     try {
       const settled = await Promise.all(
         symbols.map(symbol =>
@@ -99,8 +139,6 @@ export default async function(ctx) {
             .catch(() => ({ ok: false, symbol }))
         )
       );
-      const coins = [];
-      const failed = [];
       for (const r of settled) {
         if (r.ok && r.data && r.data.symbol) {
           const d = r.data;
@@ -117,10 +155,38 @@ export default async function(ctx) {
           failed.push(r.symbol || "?");
         }
       }
-      return { coins, failed };
     } catch (e) {
-      return { coins: [], failed: symbols };
+      // 主接口整体异常：全部记为失败，走备用接口
+      symbols.forEach(s => { if (!failed.includes(s)) failed.push(s); });
     }
+
+    // 备用接口：补齐主接口失败的币种（一次请求全部）
+    if (failed.length > 0) {
+      const baseFailed = failed.map(s => String(s).replace("USDT", "").toUpperCase());
+      const backup = await fetchFromCoinGecko(baseFailed);
+      const got = new Set();
+      for (const c of backup) {
+        coins.push(c);
+        got.add(c.symbol + "USDT");
+      }
+      // 从失败列表里去掉备用接口已补上的
+      for (let i = failed.length - 1; i >= 0; i--) {
+        if (got.has(failed[i])) failed.splice(i, 1);
+      }
+    }
+
+    // 成功拿到数据就缓存；全部失败则读缓存顶上，不再整页报错
+    if (coins.length > 0) {
+      try { ctx.storage?.setJSON(CACHE_KEY, { coins, updatedAt: Date.now() }); } catch {}
+      return { coins, failed, stale: false };
+    }
+    try {
+      const cached = ctx.storage?.getJSON(CACHE_KEY);
+      if (cached?.coins?.length) {
+        return { coins: cached.coins, failed: symbols, stale: true, cachedAt: cached.updatedAt };
+      }
+    } catch {}
+    return { coins: [], failed: symbols, stale: false };
   };
 
   const getCoinName = (symbol) => {
@@ -136,23 +202,35 @@ export default async function(ctx) {
     return names[symbol] || symbol;
   };
 
-  const { coins: dataSource, failed } = await fetchPrices();
+  const { coins: dataSource, failed, stale } = await fetchPrices();
   const hasFailure = failed.length > 0;
   const updateTime = new Date().toLocaleTimeString("zh-CN", {
     hour: "2-digit", minute: "2-digit", timeZone: "Asia/Shanghai"
   });
 
-  // 失败提示行：仅在有币种获取失败时显示，避免把不完整的数据当成实时数据展示；
+  // 失败提示行：缓存数据时显示“缓存数据”，部分失败时显示失败个数；
   // 正常时不显示，保持界面干净
-  const statusLine = () => hasFailure ? {
-    type: "text",
-    text: `⚠️ ${failed.length}个币种获取失败 · ${updateTime}`,
-    font: { size: 10 },
-    textColor: theme.down,
-    textAlign: "center",
-    maxLines: 1,
-    minScale: 0.7
-  } : null;
+  const statusLine = () => {
+    if (stale) return {
+      type: "text",
+      text: `⚠️ 缓存数据 · ${updateTime}`,
+      font: { size: 10 },
+      textColor: theme.down,
+      textAlign: "center",
+      maxLines: 1,
+      minScale: 0.7
+    };
+    if (!hasFailure) return null;
+    return {
+      type: "text",
+      text: `⚠️ ${failed.length}个币种获取失败 · ${updateTime}`,
+      font: { size: 10 },
+      textColor: theme.down,
+      textAlign: "center",
+      maxLines: 1,
+      minScale: 0.7
+    };
+  };
 
   // 全部获取失败：显示错误页，并安排自动重试（之前这里没有 refreshAfter，会一直卡住）
   if (dataSource.length === 0) {
@@ -264,7 +342,14 @@ export default async function(ctx) {
     });
 
     const rectChildren = dataSource.slice(0, 3).map(line);
-    if (hasFailure) {
+    if (stale) {
+      rectChildren.push({
+        type: "text",
+        text: `⚠️ 缓存数据 ${updateTime}`,
+        font: { size: "caption2" }, textColor: SUB, textAlign: "center",
+        maxLines: 1, minScale: 0.6
+      });
+    } else if (hasFailure) {
       rectChildren.push({
         type: "text",
         text: `⚠️ ${failed.length}个币种失败 ${updateTime}`,
