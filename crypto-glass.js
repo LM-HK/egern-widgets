@@ -5,6 +5,8 @@
  *  2026-11-23 优化：币安主站 api.binance.com 在中国和美国都会返回 451（地区限制），
  *  所以小组件一直报错；改用币安公开行情接口 data-api.binance.vision（同款返回格式），
  *  失败时再走 CoinGecko /coins/markets 补齐；全部失败则显示上次缓存的数据，不再整页报错。
+ *  请求默认走 POLICY 代理策略（默认花云，出口在境外），失败自动改直连；
+ *  POLICY 留空则全程直连。
  *
  * Glass fork: 透明版（WIDGET_STYLE 开关，glass 默认透明 / classic 原版）
  * 原版根背景未设置、走 Egern 默认；glass 下根背景显式透明，classic 用 theme.bg。
@@ -57,11 +59,28 @@ export default async function(ctx) {
   // 没有传入尺寸时（例如脚本预览），按小尺寸处理
   const widgetFamily = ctx.widgetFamily || "systemSmall";
   const btcType = ctx.env?.btcType || "BTC,ETH,BNB";
+  // 代理策略：默认走花云（出口在境外，币安行情接口可达）；留空则直连
+  const POLICY = String(ctx.env?.POLICY || "花云").trim();
   // 币安主站 api.binance.com 在中国和美国都会返回 451（地区限制），改用币安公开行情接口
   // data-api.binance.vision：同款返回格式，无需 Key，中国/美国都能访问
   const API = "https://data-api.binance.vision/api/v3";
   const COINGECKO_API = "https://api.coingecko.com/api/v3";
   const CACHE_KEY = "crypto-glass.cache.v1";
+
+  // 请求 helper：先走代理策略，失败再直连；POLICY 为空则只直连
+  const getJSON = async (url) => {
+    const tries = [];
+    if (POLICY) tries.push({ policy: POLICY });
+    tries.push({});
+    let lastErr = null;
+    for (const opts of tries) {
+      try {
+        const resp = await ctx.http.get(url, { timeout: 6000, ...opts });
+        return await resp.json();
+      } catch (e) { lastErr = e; }
+    }
+    throw lastErr || new Error("fetch failed");
+  };
 
   // CoinGecko 币种 ID（备用接口用）
   const COINGECKO_ID = {
@@ -110,8 +129,8 @@ export default async function(ctx) {
     const ids = baseSymbols.map(s => COINGECKO_ID[s]).filter(Boolean);
     if (!ids.length) return [];
     try {
-      const resp = await ctx.http.get(`${COINGECKO_API}/coins/markets?vs_currency=usd&ids=${ids.join(",")}&price_change_percentage=24h`, { timeout: 8000 });
-      const list = await resp.json();
+      const resp = await getJSON(`${COINGECKO_API}/coins/markets?vs_currency=usd&ids=${ids.join(",")}&price_change_percentage=24h`);
+      const list = resp;
       if (!Array.isArray(list)) return [];
       return list.map(c => ({
         symbol: String(c.symbol || "").toUpperCase(),
@@ -133,8 +152,7 @@ export default async function(ctx) {
     try {
       const settled = await Promise.all(
         symbols.map(symbol =>
-          ctx.http.get(`${API}/ticker/24hr?symbol=${symbol}`, { timeout: 8000 })
-            .then(resp => resp.json())
+          getJSON(`${API}/ticker/24hr?symbol=${symbol}`)
             .then(data => ({ ok: true, data }))
             .catch(() => ({ ok: false, symbol }))
         )
