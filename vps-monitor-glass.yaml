@@ -37,6 +37,10 @@ env_schema:
     name: 流量重置日
     description: 每月几号重置（1~31），需与 vnstat MonthRotate 一致
     default_value: '22'
+  EXPIRE_DATE:
+    name: 到期日
+    description: 服务器到期日（YYYY-MM-DD），续费后改成新的到期日；剩余 30 天内变橙色提醒
+    default_value: '2027-11-21'
   REFRESH_MINUTES:
     name: 刷新间隔（分钟）
     description: 范围 5 ~ 120，默认 15

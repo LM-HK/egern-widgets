@@ -52,6 +52,7 @@ function readConfig(ctx) {
     maskIp: String(env.MASK_IP ?? 'true') !== 'false',
     trafficLimitGB: Number(env.TRAFFIC_LIMIT) || 3072,
     resetDay: Number(env.RESET_DAY) || 22,
+    expireDate: String(env.EXPIRE_DATE || '2027-11-21').trim(),
   };
 }
 
@@ -480,18 +481,41 @@ function smallHeader(s) {
   };
 }
 
+// 到期日信息：解析 EXPIRE_DATE（YYYY-MM-DD），返回显示文字与颜色。
+// 注意：env_schema 的 default_value 只是占位提示，env 为空时这里默认 2027-11-21。
+// 剩余 ≤30 天变橙色提醒，过期变红色。
+function expireInfo(ctx) {
+  const raw = String(ctx.env?.EXPIRE_DATE || '2027-11-21').trim();
+  const m = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (!m) return null;
+  const target = new Date(+m[1], +m[2] - 1, +m[3]);
+  if (isNaN(target.getTime())) return null;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const days = Math.round((target - today) / 86400000);
+  if (days < 0) return { label: `已到期 ${raw}`, color: C.fail };
+  if (days <= 30) return { label: `到期 ${raw}`, color: C.warn };
+  return { label: `到期 ${raw}`, color: C.dim };
+}
+
 function footer(ctx, s, extra) {
   const parts = [`更新 ${fmtTime(s.updatedAt)}`];
   if (s.mode === 'stale') parts.push('缓存数据');
   if (extra) parts.push(extra);
+  const exp = expireInfo(ctx);
+  const children = [
+    icon('arrow.triangle.2.circlepath', C.dim, 9),
+    T(parts.join(' · '), 9, C.dim),
+  ];
+  if (exp) {
+    children.push(T(' · ', 9, C.dim));
+    children.push(T(exp.label, 9, exp.color));
+  }
+  children.push({ type: 'spacer' });
+  if (s.data) children.push(T(`${s.data.tfSource}`, 9, C.dim));
   return {
     type: 'stack', direction: 'row', alignItems: 'center', gap: 4,
-    children: [
-      icon('arrow.triangle.2.circlepath', C.dim, 9),
-      T(parts.join(' · '), 9, C.dim),
-      { type: 'spacer' },
-      ...(s.data ? [T(`${s.data.tfSource}`, 9, C.dim)] : []),
-    ],
+    children,
   };
 }
 
