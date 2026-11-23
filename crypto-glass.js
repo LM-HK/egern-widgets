@@ -59,8 +59,8 @@ export default async function(ctx) {
   // 没有传入尺寸时（例如脚本预览），按小尺寸处理
   const widgetFamily = ctx.widgetFamily || "systemSmall";
   const btcType = ctx.env?.btcType || "BTC,ETH,BNB";
-  // 代理策略：默认走花云（出口在境外，币安行情接口可达）；留空则直连
-  const POLICY = String(ctx.env?.POLICY || "花云").trim();
+  // 代理策略：默认走 Ming'Egern；自建就是你的美西节点
+  const POLICY = String(ctx.env?.POLICY || "Ming'Egern").trim();
   // 币安主站 api.binance.com 在中国和美国都会返回 451（地区限制），改用币安公开行情接口
   // data-api.binance.vision：同款返回格式，无需 Key，中国/美国都能访问
   const API = "https://data-api.binance.vision/api/v3";
