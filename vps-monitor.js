@@ -95,7 +95,7 @@ async function collect(ctx, cfg) {
     port: cfg.port,
     username: cfg.username,
     ...(finalKey ? { privateKey: finalKey } : { password: cfg.password }),
-    timeout: 8000,
+    timeout: 15000,
   });
 
   const SEP = '<<SEP>>';
@@ -451,6 +451,12 @@ function glass(children, extra = {}) {
 // 布局组件
 // ---------------------------------------------------------------------------
 
+// 缓存时右上角显示报错原因（便于排障），而不是开机时长
+function shortErr(msg) {
+  const m = String(msg || '').replace(/\s+/g, ' ').trim();
+  return m.length > 48 ? m.slice(0, 48) + '…' : m;
+}
+
 function header(s) {
   const st = statusOf(s);
   return {
@@ -462,7 +468,7 @@ function header(s) {
       dot(st.color),
       T(st.label, 10, st.color, 'semibold'),
       T('·', 10, C.dim),
-      T(s.data ? s.data.uptime : st.label, 10, C.dim),
+      T(s.mode === 'stale' && s.error ? shortErr(s.error) : (s.data ? s.data.uptime : st.label), 10, C.dim),
     ],
   };
 }
