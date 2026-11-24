@@ -4,6 +4,8 @@
  * 说明：
  * - 客户端选择通过模块的 env_schema 写入模块级 env
  * - 脚本直接读取 ctx.env.CLIENT
+ * - 注意：Egern 的 env_schema default_value 只是占位提示，不会真的写入
+ *   ctx.env，所以这里的后备值必须也是 Nagram，否则不手动设置就不会跳转
  */
 
 const SCHEME = {
@@ -53,7 +55,7 @@ export default async function (ctx) {
   const m = url.match(/^https?:\/\/(?:t\.me|telegram\.me)\/(.+)$/i);
   if (!m) return;
 
-  const client = (ctx.env?.CLIENT || "Telegram").trim();
+  const client = (ctx.env?.CLIENT || "Nagram").trim();
 
   if (client === "Telegram") return;
 

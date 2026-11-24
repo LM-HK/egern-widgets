@@ -21,7 +21,7 @@ scriptings:
 - http_request:
     name: Telegram 链接重定向
     match: ^https?://(t\.me|telegram\.me)/.+
-    script_url: https://raw.githubusercontent.com/LM-HK/egern-widgets/main/telegram-redirect.js
+    script_url: https://raw.githubusercontent.com/LM-HK/egern-widgets/main/telegram-redirect.js?v=2
     timeout: 10
 mitm:
   hostnames:
