@@ -24,7 +24,7 @@ env_schema:
 scriptings:
 - generic:
     name: shishiyoujia-glass
-    script_url: https://raw.githubusercontent.com/LM-HK/egern-widgets/main/shishiyoujia-glass.js
+    script_url: https://raw.githubusercontent.com/LM-HK/egern-widgets/main/shishiyoujia-glass.js?v=2
 
 widgets:
 - name: 全国油价
