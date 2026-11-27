@@ -37,3 +37,11 @@ https://raw.githubusercontent.com/LM-HK/egern-widgets/main/crypto-glass.yaml
 ## 网络诊断雷达
 
 https://raw.githubusercontent.com/LM-HK/egern-widgets/main/network-radar-glass.yaml
+
+## VPS 服务器监控
+
+https://raw.githubusercontent.com/LM-HK/egern-widgets/main/vps-monitor-glass.yaml
+
+## 天气·晴雨
+
+https://raw.githubusercontent.com/LM-HK/egern-widgets/main/weather-wdg-glass.yaml
