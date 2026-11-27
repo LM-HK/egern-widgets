@@ -1,0 +1,34 @@
+name: "🌤️ 天气 · 透明版（无锡）"
+description: "天气小组件：实时温度/体感/风/气压/能见度/降水/湿度与 5 日预报；Open-Meteo 免费数据，无需 Key；默认惠山·无锡，glass 默认透明"
+author: "mickeu"
+icon: "cloud.sun.fill"
+
+env_schema:
+  CITY:
+    name: 城市
+    description: "显示的城市名，如 惠山，默认惠山"
+    default_value: "惠山"
+  LAT:
+    name: 纬度
+    description: "纬度，如 31.68，默认惠山"
+    default_value: "31.68"
+  LON:
+    name: 经度
+    description: "经度，如 120.29，默认惠山"
+    default_value: "120.29"
+  WIDGET_STYLE:
+    name: 样式
+    description: "glass 透明 / classic 原版"
+    default_value: "glass"
+    options:
+      - "glass"
+      - "classic"
+
+scriptings:
+- generic:
+    name: weather-glass
+    script_url: https://raw.githubusercontent.com/LM-HK/egern-widgets/main/weather-glass.js?v=1
+
+widgets:
+- name: 天气
+  script_name: weather-glass
