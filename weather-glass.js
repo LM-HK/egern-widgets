@@ -3,6 +3,7 @@
  * Glass fork: 透明版（WIDGET_STYLE 开关，glass 默认透明 / classic 原版）
  * 布局参照用户截图里的天气小组件：顶部城市+更新时间，当前大温度+天气状况+最高最低，
  * 详情三列两行（体感/风/气压/能见度/降水/湿度），底部 5 日预报。
+ * 中号按 170pt 高度做了紧凑排版：详情用单行文字（标签+数值同一行），避免两行堆叠溢出。
  *
  * 数据：Open-Meteo 免费 API，无需 Key；实时温度与苹果天气实测只差约 0.3°。
  * 注意：Open-Meteo 不提供 AQI 与气象预警，详情里用气压代替 AQI，预警栏省略。
@@ -91,7 +92,7 @@ export default async function(ctx) {
   const subColor = glass ? 'rgba(255,255,255,0.75)' : '#CCCCCC';
   const dimColor = glass ? 'rgba(255,255,255,0.6)' : '#999999';
 
-  const pad = isLarge ? 18 : (isSmall ? 12 : 12);
+  const pad = isLarge ? 16 : 10;
   const children = [];
 
   // ===== 顶部：城市 + 更新时间 =====
@@ -110,8 +111,8 @@ export default async function(ctx) {
     children.push({
       type: 'stack', direction: 'row', alignItems: 'center', gap: 6,
       children: [
-        { type: 'text', text: temp + '°', font: { size: 44, weight: 'bold' }, textColor: titleColor },
-        { type: 'text', text: cond.icon, font: { size: 28 } }
+        { type: 'text', text: temp + '°', font: { size: 40, weight: 'bold' }, textColor: titleColor },
+        { type: 'text', text: cond.icon, font: { size: 26 } }
       ]
     });
     children.push({ type: 'spacer', length: 2 });
@@ -120,12 +121,12 @@ export default async function(ctx) {
     children.push({ type: 'text', text: '体感 ' + feels + '° · ' + windTxt, font: { size: 'caption1' }, textColor: dimColor });
   } else {
     // ===== 中号 / 大号：当前天气行 =====
-    children.push({ type: 'spacer', length: 4 });
+    children.push({ type: 'spacer', length: 2 });
     children.push({
       type: 'stack', direction: 'row', alignItems: 'center',
       children: [
-        { type: 'text', text: temp + '°', font: { size: isLarge ? 56 : 46, weight: 'bold' }, textColor: titleColor },
-        { type: 'text', text: cond.icon, font: { size: isLarge ? 34 : 28 } },
+        { type: 'text', text: temp + '°', font: { size: isLarge ? 52 : 40, weight: 'bold' }, textColor: titleColor },
+        { type: 'text', text: cond.icon, font: { size: isLarge ? 32 : 26 } },
         { type: 'spacer' },
         {
           type: 'stack', direction: 'column', alignItems: 'end', gap: 1,
@@ -138,40 +139,26 @@ export default async function(ctx) {
       ]
     });
 
-    // ===== 详情三列两行 =====
-    children.push({ type: 'spacer', length: 6 });
-    const detailCell = (label, value) => ({
-      type: 'stack', direction: 'column', alignItems: 'center', gap: 1, flex: 1,
-      children: [
-        { type: 'text', text: label, font: { size: 'caption2' }, textColor: dimColor },
-        { type: 'text', text: value, font: { size: 'caption1', weight: 'medium' }, textColor: titleColor }
-      ]
-    });
-    children.push({
-      type: 'stack', direction: 'row', alignItems: 'center',
-      children: [
-        detailCell('体感', feels + '°'),
-        detailCell('风', windTxt),
-        detailCell('气压', pressure + ' hPa')
-      ]
-    });
+    // ===== 详情三列两行：单行文字（标签+数值同一行），不堆叠 =====
     children.push({ type: 'spacer', length: 4 });
-    children.push({
-      type: 'stack', direction: 'row', alignItems: 'center',
-      children: [
-        detailCell('能见度', visibility),
-        detailCell('降水', precip + 'mm'),
-        detailCell('湿度', humidity + '%')
-      ]
+    const detailCell = (text) => ({
+      type: 'text', text, font: { size: 'caption1', weight: 'medium' }, textColor: titleColor, flex: 1
     });
+    const detailRow = (items) => ({
+      type: 'stack', direction: 'row', alignItems: 'center',
+      children: items.map(detailCell)
+    });
+    children.push(detailRow(['体感 ' + feels + '°', windTxt, '气压 ' + pressure + ' hPa']));
+    children.push({ type: 'spacer', length: 3 });
+    children.push(detailRow(['能见度 ' + visibility, '降水 ' + precip + 'mm', '湿度 ' + humidity + '%']));
 
     // ===== 5 日预报 =====
-    children.push({ type: 'spacer', length: 8 });
+    children.push({ type: 'spacer', length: 5 });
     const dayCell = (d) => ({
-      type: 'stack', direction: 'column', alignItems: 'center', gap: 2, flex: 1,
+      type: 'stack', direction: 'column', alignItems: 'center', gap: 1, flex: 1,
       children: [
         { type: 'text', text: d.label, font: { size: 'caption1' }, textColor: subColor },
-        { type: 'text', text: d.icon, font: { size: isLarge ? 22 : 18 } },
+        { type: 'text', text: d.icon, font: { size: isLarge ? 20 : 16 } },
         { type: 'text', text: d.cond, font: { size: 'caption2' }, textColor: subColor },
         { type: 'text', text: d.high + '° ' + d.low + '°', font: { size: 'caption1', weight: 'bold' }, textColor: titleColor }
       ]

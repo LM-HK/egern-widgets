@@ -27,7 +27,7 @@ env_schema:
 scriptings:
 - generic:
     name: weather-glass
-    script_url: https://raw.githubusercontent.com/LM-HK/egern-widgets/main/weather-glass.js?v=1
+    script_url: https://raw.githubusercontent.com/LM-HK/egern-widgets/main/weather-glass.js?v=2
 
 widgets:
 - name: 天气
