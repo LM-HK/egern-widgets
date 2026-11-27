@@ -1,0 +1,34 @@
+name: "🌤️ 天气·晴雨（Open-Meteo）"
+description: "Aswoth 天气·晴雨透明版改版：核心天气改用 Open-Meteo（更接近苹果天气），AQI/预警/生活指数仍用中国天气网；默认惠山·无锡，glass 默认透明"
+author: "小龙女她爸 · Open-Meteo fork: mickeu"
+icon: "cloud.sun.fill"
+
+env_schema:
+  CITY:
+    name: 城市
+    description: "城市名，如 惠山；留空则按 IP 自动定位"
+    default_value: "惠山"
+  LAT:
+    name: 纬度
+    description: "Open-Meteo 查询纬度，如 31.68，默认惠山"
+    default_value: "31.68"
+  LON:
+    name: 经度
+    description: "Open-Meteo 查询经度，如 120.29，默认惠山"
+    default_value: "120.29"
+  WIDGET_STYLE:
+    name: 样式
+    description: "glass 透明 / classic 原版"
+    default_value: "glass"
+    options:
+      - "glass"
+      - "classic"
+
+scriptings:
+- generic:
+    name: weather-wdg-openmeteo
+    script_url: https://raw.githubusercontent.com/LM-HK/egern-widgets/main/weather-wdg-glass.js?v=1
+
+widgets:
+- name: 天气·晴雨（Open-Meteo）
+  script_name: weather-wdg-openmeteo
